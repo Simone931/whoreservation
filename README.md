@@ -1,6 +1,6 @@
-# Marmellata
+# Who's Your Stylist reservations
 
-API per cipolla.marmellata gestite tramite il framework BE fastify con linguaggio javascript. Questa applicazione viene deployata da usa lambda in AWS che dichiara il nostro unico endpoint su API-gateway.
+API per whoisyourstylist gestite tramite il framework BE fastify con linguaggio javascript. Questa applicazione viene deployata da usa lambda in AWS che dichiara il nostro unico endpoint su API-gateway.
 
 # Cosa comprende
 
@@ -36,41 +36,6 @@ il `{valore-api-key-in-locale}` è possibile recuperarlo eseguendo un `make logs
 ```
 offline: Key with token:  XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ```
-
-# Accedere al container una volta che è up
-
-```
-make cli
-```
-
-# Eseguire i test
-
-```
-make unit-test
-```
-
-# Eseguire il linting del codice
-
-```
-make lint
-```
-
-# Deploy stage
-
-```
-make stage-deploy
-```
-
-# Cloudwatch dashboard
-
-Questo starterkit comprende una dashboard custom di Cloudwatch per monitorare tutte le risorse comprese. Ogni ambiente (`stage`, `prod`) ha la sua dashboard dedicata in cui vengono mostrate solo le risorse con il tag dell'ambiente. Tutti i file relativi alla dashboard sono contenuti nella cartella `dashboard`, per crearla e gestirla è usato Terraform al momento del deploy del progetto (tramite Github Actions).
-É possibile visita le dashboard a questo link:
-
-STAGE dashboard:
-https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#dashboards:name=Marmellata-STAGE
-
-PROD dashboard:
-https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#dashboards:name=Marmellata-PROD
 
 # Trattamento dei dati sensibili presenti nella response
 
