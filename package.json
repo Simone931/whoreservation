@@ -1,5 +1,5 @@
 {
-  "name": "Marmellata",
+  "name": "whoreservation",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
@@ -19,7 +19,7 @@
     "delete-cert": "node ./node_modules/serverless/bin/serverless remove-cert --stage ${1}"
   },
   "keywords": [],
-  "author": "Santagostino",
+  "author": "Simone",
   "license": "ISC",
   "dependencies": {
     "aws-lambda-fastify": "^1.4.4",
