@@ -1,0 +1,268 @@
+apiVersion: backstage.io/v1beta2
+kind: Template
+metadata:
+  name: create-fastify-api
+  title: Fastify API template
+  description: Create a new Fastify API scaffolding project with js
+  tags:
+    - node
+    - fastify
+    - serverless
+    - lambda
+    - javascript
+spec:
+  owner: santagostino
+  type: service
+  parameters:
+    - title: Project
+      required:
+        - name
+        - description
+        - domain
+        - owner
+        - lifecycle
+        - type
+      properties:
+        name:
+          title: Name
+          type: string
+          description: Unique name of the project
+          ui:autofocus: true
+          ui:options:
+            rows: 5
+        description:
+          title: Description
+          type: string
+          description: Help others understand what this service is for
+          ui:options:
+            rows: 10
+        owner:
+          title: Owner
+          type: string
+          default: 'santagostino'
+          description: Owner of the project
+          ui:field: OwnerPicker
+          ui:options:
+            allowedKinds:
+              - Group
+        domain:
+          title: Domain name
+          type: string
+          description: Domain name for the API Gateway custom domain name (no capital letters)
+          ui:options:
+            rows: 5
+        system:
+          title: System
+          type: string
+          default: ''
+          description: Help others understand which is the context of this service inside of your system
+          ui:options:
+            rows: 10
+        lifecycle:
+          title: Lifecycle
+          type: string
+          description: The lifecycle of the project
+          default: development
+          enum: [
+            'development',
+            'production',
+            'experimental',
+            'deprecated',
+            'deleted',
+          ]
+          enumNames: [
+            'Development',
+            'Production',
+            'Experimental',
+            'Deprecated',
+            'Deleted',
+          ]
+        type:
+          title: Type
+          type: string
+          default: service
+          description: The type of the project
+          enum: [
+            'service',
+            'api',
+            'external-service',
+            'internal-service',
+            'middleware',
+            'webapp',
+          ]
+          enumNames: [
+            'service',
+            'API',
+            'External service',
+            'Internal service',
+            'Middleware',
+            'Webapp',
+          ]
+    - title: Project specifics
+      properties:
+        xray:
+          title: Enable Xray tracing
+          type: boolean
+          default: false
+        vpc:
+          title: Add the VPC configurations to enable connection to existing services
+          type: boolean
+          default: false
+        additionalTags:
+          title: Tags
+          description: Additional tags to group different components within the Backstage catalog and AWS monitoring dashboards
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+          uniqueItems: true
+          ui:options:
+            orderable: false
+        dimension:
+          title: Memory allocation and Timeout for lambda functions
+          type: object
+          properties:
+            functionMemoryAllocation:
+              title: Function memory allocation
+              type: number
+              default: 128
+              minimum: 128
+              maximum: 10240
+              ui:widget: updown
+            functionTimeout:
+              title: Function timeout
+              type: number
+              default: 30
+              minimum: 30
+              maximum: 900
+              ui:widget: updown
+        apiKeys:
+          title: Api keys
+          type: object
+          properties:
+            enableApiKeys:
+              title: Enable Api Keys generation
+              type: boolean
+              default: false
+            quotaLimit:
+              title: The quota to limit. The number of requests a user can make to your API in a given time period
+              type: number
+              default: 5000
+              minimum: 1
+              maximum: 2147483647
+              ui:widget: updown
+            quotaOffset:
+              title: The day that a time period starts. For example, with a time period of WEEK, an offset of 0 starts on Sunday, and an offset of 1 starts on Monday
+              type: number
+              default: 2
+              minimum: 0
+              maximum: 6
+              ui:widget: updown
+            quotaPeriod:
+              title: Quota time period for which the maximum limit of requests applies
+              type: string
+              default: MONTH
+              enum: [
+                'MONTH',
+                'DAY',
+                'WEEK',
+              ]
+              enumNames: [
+                'MONTH',
+                'DAY',
+                'WEEK',
+              ]
+            throttleBurstLimit:
+              title: The capacity of the Token Bucket
+              type: number
+              default: 400
+              minimum: 0
+              maximum: 5000
+              ui:widget: updown
+            throttleRateLimit:
+              title: The rate at which tokens are added to the Token Bucket. This value indicates the average number of requests per second over an extended period of time
+              type: number
+              default: 100
+              minimum: 0
+              maximum: 10000
+              ui:widget: updown
+    - title: Choose a location
+      required:
+        - repoUrl
+      properties:
+        repoUrl:
+          title: Repository Location
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+
+  steps:
+    - id: fetch-base
+      name: Fetch Base
+      action: fetch:template
+      input:
+        url: /
+        values:
+          name: "{{ parameters.name }}"
+          description: "{{ parameters.description }}"
+          owner: "{{ parameters.owner }}"
+          domain: "{{ parameters.domain }}"
+          system: "{{ parameters.system }}"
+          lifecycle: "{{ parameters.lifecycle }}"
+          type: "{{ parameters.type }}"
+          xray: "{{ parameters.xray }}"
+          vpc: "{{ parameters.vpc }}"
+          additionalTags: "{{ json parameters.additionalTags }}"
+          destination: "{{ parseRepoUrl parameters.repoUrl }}"
+          enableApiKeys: "{{ parameters.apiKeys.enableApiKeys }}"
+          quotaLimit: "{{ parameters.apiKeys.quotaLimit }}"
+          quotaOffset: "{{ parameters.apiKeys.quotaOffset }}"
+          quotaPeriod: "{{ parameters.apiKeys.quotaPeriod }}"
+          throttleBurstLimit: "{{ parameters.apiKeys.throttleBurstLimit }}"
+          throttleRateLimit: "{{ parameters.apiKeys.throttleRateLimit }}"
+          functionMemoryAllocation: "{{ parameters.dimension.functionMemoryAllocation }}"
+          functionTimeout: "{{ parameters.dimension.functionTimeout }}"
+        copyWithoutRender: ["template.yaml", "jest.config.js", "Makefile", "entrypoint.sh"]
+
+    - id: publish
+      name: Publish
+      action: publish:github
+      input:
+        allowedHosts: ["github.com"]
+        description: "{{ parameters.description }}"
+        repoUrl: "{{ parameters.repoUrl }}"
+
+    - id: branch
+      name: Create branch
+      action: github:create-branch
+      input:
+        repoUrl: "{{ parameters.repoUrl }}"
+        branchName: 'stage'
+
+    - id: register
+      name: Register
+      action: catalog:register
+      input:
+        repoContentsUrl: "{{ steps.publish.output.repoContentsUrl }}"
+        catalogInfoPath: "/catalog-info.yaml"
+
+    - id: publish-techdocs
+      name: Publish techdocs
+      action: github:run-workflow
+      input:
+        repoUrl: "{{ parameters.repoUrl }}"
+        workflow: 'techdocs-prod'
+
+  output:
+    links:
+      - title: Repository
+        url: "{{ steps.publish.output.remoteUrl }}"
+      - title: Open in catalog
+        icon: 'catalog'
+        entityRef: "{{ steps.register.output.entityRef }}"

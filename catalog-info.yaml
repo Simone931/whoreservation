@@ -1,0 +1,29 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: Marmellata
+  links:
+    - url: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#dashboards:name=Marmellata-STAGE
+      title: DASHBOARD di monitoraggio - STAGE
+      icon: dashboard
+    - url: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#dashboards:name=Marmellata-PROD
+      title: DASHBOARD di monitoraggio - PROD
+      icon: dashboard
+  description: "cipolla.marmellata"
+  annotations:
+    github.com/project-slug: santagostino/marmellata
+    backstage.io/techdocs-ref: url:https://github.com/santagostino/marmellata
+  tags:
+    - node
+    - fastify
+    - serverless
+    - lambda
+    - javascript
+    
+spec:
+  type: service
+  lifecycle: development
+  owner: "santagostino"
+  system: cipolla
+  providesApis: 
+    - Marmellata-api

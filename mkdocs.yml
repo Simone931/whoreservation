@@ -1,0 +1,12 @@
+site_name: "Marmellata"
+site_description: "cipolla.marmellata"
+
+nav:
+  - Home: index.md
+  - 'Struttura starterkit': starterkit-structure.md
+  - 'Log operazionali': 'operational-logs.md'
+  - 'Connessione ai servizi esistenti': 'connection-to-existing-services.md'
+  - 'Trattamento dati sensibili': 'sensible-data.md'
+
+plugins:
+  - techdocs-core

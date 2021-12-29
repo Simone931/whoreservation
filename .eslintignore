@@ -1,0 +1,16 @@
+node_modules
+dist
+coverage
+**/*.md
+*.yml
+Dockerfile
+entrypoint.sh
+package.json
+*.md
+yarn.lock
+Makefile
+.env
+.env.template
+.github
+.prettierrc.js
+.gitignore

@@ -1,0 +1,99 @@
+service: marmellata
+frameworkVersion: "2"
+useDotenv: true
+plugins:
+  - serverless-certificate-creator
+  - serverless-domain-manager
+  - serverless-cloudfront-plugin
+  - serverless-offline
+  - serverless-plugin-resource-tagging
+  - serverless-webpack
+  - serverless-dynamodb-local
+
+provider:
+  name: aws
+  region: ${env:AWS_DEFAULT_REGION}
+  stage: ${opt:stage, 'local'}
+  runtime: nodejs14.x
+  memorySize: 128
+  timeout: 30
+  logRetentionInDays: 14
+  lambdaHashingVersion: 20201221
+  environment:
+    APP_ENV: ${opt:stage, 'local'}
+    DYNAMODB_WHO_TABLE: "reservations"
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - "dynamodb:GetItem"
+            - "dynamodb:PutItem"
+            - "dynamodb:Scan"
+            - "dynamodb:Query"
+          Resource:
+            - >-
+              arn:aws:dynamodb:${opt:region,
+              self:provider.region}:*:table/${self:provider.environment.DYNAMODB_WHO_TABLE}
+            - >-
+              arn:aws:dynamodb:${opt:region,
+              self:provider.region}:*:table/${self:provider.environment.DYNAMODB_WHO_TABLE}/index/*
+  stackTags:
+    Project: "${self:service}"
+    Environment: "${opt:stage, 'local'}"
+
+functions:
+  app:
+    handler: app/app.handler
+
+    events:
+      - http:
+          path: /
+          method: ANY
+          cors: true
+
+      - http:
+          path: /{proxy+}
+          method: ANY
+          cors: true
+
+resources:
+  Resources:
+    WhoReservations:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: "${self:provider.environment.DYNAMODB_WHO_TABLE}"
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+custom:
+  basePath:
+    stage: "stage"
+    prod: ""
+
+  serverless-offline:
+    host: 0.0.0.0
+
+  webpack:
+    webpackConfig: "./webpack.config.js"
+    includeModules: true
+    packager: "yarn"
+    excludeFiles: app/**/*.test.js
+
+  dynamodb:
+    stages:
+      - local
+    start:
+      port: 8000
+      dbPath: "./database"
+      heapInitial: 200m
+      heapMax: 1g
+      migrate: true
+      convertEmptyValues: true
