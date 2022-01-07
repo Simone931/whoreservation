@@ -1,6 +1,6 @@
 # Who's Your Stylist reservations
 
-API per whoisyourstylist gestite tramite il framework BE fastify con linguaggio javascript. Questa applicazione viene deployata da usa lambda in AWS che dichiara il nostro unico endpoint su API-gateway.
+API per whoisyourstylist gestite tramite il framework BE fastify con linguaggio javascript.
 
 # Cosa comprende
 
