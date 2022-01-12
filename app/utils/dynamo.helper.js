@@ -74,6 +74,18 @@ exports.scanDynamo = async (table, key, value) => {
   return null;
 };
 
+exports.scanAll = async (table) => {
+  const params = {
+    TableName: table
+  };
+
+  const result = await ddb.rawClient.scan(params).promise();
+  if (result.Count > 0) {
+    return result.Items;
+  }
+  return null;
+};
+
 exports.deleteRecordFromDynamo = async (table, query) => {
   const params = {
     TableName: table,
@@ -108,31 +120,57 @@ exports.updateItemDynamo = (table, key, params) => {
   return ddb.rawClient.updateItem(params).promise();
 };
 
-exports.formatDynamoResult = (result) => {
+exports.formatDynamoResult = (result, is_array) => {
 
   if (typeof result.Item != 'undefined') {
     result = result.Item;
   }
 
   let data = {};
-  for (const i in result) {
 
-    if (typeof result[i].S != 'undefined') {
-      data[i] = result[i].S;
-      continue;
-    }
-    if (typeof result[i].N != 'undefined') {
-      data[i] = parseInt(result[i].N);
-      continue;
-    }
-    if (typeof result[i].BOOL != 'undefined') {
-      data[i] = result[i].BOOL
-      continue;
-    }
+  if (is_array) {
+    let params = [];
 
+    for (const element of result) {
+      for (const i in element) {
+
+        if (typeof element[i].S != 'undefined') {
+          data[i] = element[i].S;
+          continue;
+        }
+        if (typeof element[i].N != 'undefined') {
+          data[i] = parseInt(element[i].N);
+          continue;
+        }
+        if (typeof element[i].BOOL != 'undefined') {
+          data[i] = element[i].BOOL
+          continue;
+        }
+      }
+      params.push(data);
+    }
+    return params;
+  } else {
+
+    for (const i in result) {
+
+      if (typeof result[i].S != 'undefined') {
+        data[i] = result[i].S;
+        continue;
+      }
+      if (typeof result[i].N != 'undefined') {
+        data[i] = parseInt(result[i].N);
+        continue;
+      }
+      if (typeof result[i].BOOL != 'undefined') {
+        data[i] = result[i].BOOL
+        continue;
+      }
+
+    }
+    return data;
   }
 
-  return data;
 
 }
 
@@ -154,7 +192,7 @@ exports.multipleScanDynamo = async (table, data) => {
     FilterExpression: exp,
     ExpressionAttributeValues: vals,
   };
-console.log(params)
+  console.log(params)
   const result = await ddb.rawClient.scan(params).promise();
 
   if (result.Count > 0) {
