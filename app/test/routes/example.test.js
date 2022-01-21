@@ -1,6 +1,5 @@
 const example = require('../../routes/example');
 const fastify = require('fastify');
-const elkLogService = example.__get__('elkLogService');
 
 describe('example is loaded', () => {
   let fastifyInstance = null;
@@ -14,12 +13,10 @@ describe('example is loaded', () => {
   });
 
   it('GET returns 200', async () => {
-    const spy = jest.spyOn(fastifyInstance, 'sendLogMessage');
     await example(fastifyInstance);
     const response = await fastifyInstance.inject({ method: 'GET', url: '/example' });
     expect(response.statusCode).toEqual(200);
     const payload = JSON.parse(response.payload);
-    expect(spy).toHaveBeenCalledWith(elkLogService.elkLogLevel.INFO, 'Send the response');
     expect(payload).toMatchSnapshot({
       code: '178172127981',
       cognome: 'Example',
